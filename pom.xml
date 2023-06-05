@@ -9,8 +9,8 @@
         <version>3.7.2</version>
     </parent>
 
-    <groupId>org.fiware.gaiax</groupId>
-    <artifactId>trusted-issuer-registry-wrapper</artifactId>
+    <groupId>org.fiware.iam</groupId>
+    <artifactId>trusted-issuers-registry</artifactId>
     <version>0.0.1</version>
 
     <description>${project.description}</description>
@@ -37,33 +37,50 @@
         <!-- project info -->
         <project.author.name>Tim Smyth</project.author.name>
         <project.author.email>tim.smyth@fiware.org</project.author.email>
-        <project.description>EBSI TrustedIssuerRegistry API Impl with Context broker backend
+        <project.description>EBSI TrustedIssuersRegistry API Impl with Context broker backend
         </project.description>
-        <project.summary>EBSI TrustedIssuerRegistry API Impl with Context broker backend.</project.summary>
-        <project.url>https://github.com/pulledtim/trusted-issuer-registry-wrapper</project.url>
+        <project.summary>EBSI TrustedIssuersRegistry API Impl with Context broker backend.</project.summary>
+        <project.url>https://github.com/pulledtim/trusted-issuers-registry</project.url>
         <project.license.name>Apache License 2.0</project.license.name>
         <project.license.identifier>Apache License 2.0</project.license.identifier>
         <project.license.url>https://www.apache.org/licenses/LICENSE-2.0</project.license.url>
-        <project.title>FIWARE Trusted Issuer Registry Wrapper</project.title>
+        <project.title>FIWARE Trusted Issuers Registry</project.title>
         <project.vendor>FIWARE Foundation, e.V.</project.vendor>
         <project.contact.domain>fiware.org</project.contact.domain>
         <project.contact.email>tim.smyth@fiware.org</project.contact.email>
 
-
+        <!-- div -->
         <version.io.kokuwa.micronaut.logging>3.0.4</version.io.kokuwa.micronaut.logging>
+        <ngsi-ld-java-mapping.version>0.1.2</ngsi-ld-java-mapping.version>
+        <commons-codec.version>1.15</commons-codec.version>
+        <logback-classic.version>1.2.3</logback-classic.version>
+        <javax.inject.version>1</javax.inject.version>
+        <findbugs.annotations.version>3.0.1u2</findbugs.annotations.version>
+        <jaxb-api.version>2.3.1</jaxb-api.version>
+        <java-jwt.version>4.4.0</java-jwt.version>
+        <nimbus-jose-jwt.version>9.31</nimbus-jose-jwt.version>
+        <bcprov-jdk15on.version>1.70</bcprov-jdk15on.version>
+
+        <!-- Test -->
+        <version.io.kokuwa.maven.k3s-plugin>0.7.0</version.io.kokuwa.maven.k3s-plugin>
+        <version.org.jacoco.maven-plugin>0.8.8</version.org.jacoco.maven-plugin>
+        <version.org.mockito.mockito-all>1.10.19</version.org.mockito.mockito-all>
+        <version.org.awaitility>4.0.3</version.org.awaitility>
+        <assertj-core.version>3.11.1</assertj-core.version>
+        <version.org.eluder.coveralls.maven-plugin>4.3.0</version.org.eluder.coveralls.maven-plugin>
 
         <!-- docker -->
-        <exec.mainClass>org.fiware.gaiax.wrapper.Application</exec.mainClass>
+        <exec.mainClass>org.fiware.iam.tir.Application</exec.mainClass>
         <image.registry>quay.io</image.registry>
-        <image.repository>wi_stefan</image.repository>
+        <image.repository>pulledtim</image.repository>
 
         <!-- lazy dev -->
         <version.org.mapstruct>1.5.3.Final</version.org.mapstruct>
         <version.org.projectlombok>1.18.26</version.org.projectlombok>
-
         <!-- code gen -->
         <version.org.openapitools.generator-maven-plugin>6.1.0</version.org.openapitools.generator-maven-plugin>
         <version.io.kokuwa.micronaut.codegen>3.2.2</version.io.kokuwa.micronaut.codegen>
+
 
     </properties>
 
@@ -78,27 +95,22 @@
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
-            <version>
-                ${version.org.mapstruct}</version>
+            <version>${version.org.mapstruct}</version>
         </dependency>
 
 
-        <!-- NGSI LD Cconnector -->
-        <dependency>
-            <groupId>org.fiware.tmforum</groupId>
-            <artifactId>common</artifactId>
-            <version>0.1</version>
-        </dependency>
+        <!-- NGSI LD Connector -->
         <dependency>
             <groupId>io.github.wistefan</groupId>
             <artifactId>ngsi-ld-java-mapping</artifactId>
-            <version>0.1.2</version>
+            <version>${ngsi-ld-java-mapping.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.15</version>
+            <version>${commons-codec.version}</version>
         </dependency>
+
         <!-- micronaut -->
         <dependency>
             <groupId>io.micronaut</groupId>
@@ -127,15 +139,6 @@
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-core</artifactId>
         </dependency>
-        <!-- logging -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
-            <scope>runtime</scope>
-        </dependency>
-
-
         <dependency>
             <groupId>org.graalvm.nativeimage</groupId>
             <artifactId>svm</artifactId>
@@ -186,6 +189,28 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- Metering -->
+        <dependency>
+            <groupId>io.micronaut.micrometer</groupId>
+            <artifactId>micronaut-micrometer-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micronaut.micrometer</groupId>
+            <artifactId>micronaut-micrometer-registry-statsd</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micronaut.micrometer</groupId>
+            <artifactId>micronaut-micrometer-registry-prometheus</artifactId>
+        </dependency>
+
+        <!-- logging -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback-classic.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- mn copy -->
         <dependency>
             <groupId>io.micronaut.cache</groupId>
@@ -203,7 +228,7 @@
         <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
-            <version>1</version>
+            <version>${javax.inject.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.annotation</groupId>
@@ -213,7 +238,7 @@
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>annotations</artifactId>
-            <version>3.0.1u2</version>
+            <version>${findbugs.annotations.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -223,32 +248,89 @@
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
-            <version>2.3.1</version>
+            <version>${jaxb-api.version}</version>
         </dependency>
         <!-- JWT -->
         <dependency>
             <groupId>com.auth0</groupId>
             <artifactId>java-jwt</artifactId>
-            <version>4.4.0</version>
+            <version>${java-jwt.version}</version>
         </dependency>
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
-            <version>9.31</version>
+            <version>${nimbus-jose-jwt.version}</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.70</version>
+            <version>${bcprov-jdk15on.version}</version>
         </dependency>
 
         <!-- Tests -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>io.micronaut.test</groupId>
             <artifactId>micronaut-test-junit5</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.micronaut.test</groupId>
+            <artifactId>micronaut-test-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj-core.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-all</artifactId>
+                <version>${version.org.mockito.mockito-all}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.awaitility</groupId>
+                <artifactId>awaitility</artifactId>
+                <version>${version.org.awaitility}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <resources>
@@ -272,9 +354,9 @@
                         </goals>
                         <configuration>
                             <inputSpec>./api/trusted-issuers-registry.yaml</inputSpec>
-                            <apiPackage>org.fiware.gaiax.tir.api</apiPackage>
+                            <apiPackage>org.fiware.iam.tir.api</apiPackage>
                             <strictSpec>true</strictSpec>
-                            <modelPackage>org.fiware.gaiax.tir.model</modelPackage>
+                            <modelPackage>org.fiware.iam.tir.model</modelPackage>
                             <generateAliasAsModel>true</generateAliasAsModel>
                             <generateApiTests>true</generateApiTests>
                             <generateModelTests>false</generateModelTests>
@@ -306,9 +388,9 @@
                         </goals>
                         <configuration>
                             <inputSpec>./api/satellite.yaml</inputSpec>
-                            <apiPackage>org.fiware.gaiax.satellite.api</apiPackage>
+                            <apiPackage>org.fiware.iam.satellite.api</apiPackage>
                             <strictSpec>true</strictSpec>
-                            <modelPackage>org.fiware.gaiax.satellite.model</modelPackage>
+                            <modelPackage>org.fiware.iam.satellite.model</modelPackage>
                             <generateAliasAsModel>true</generateAliasAsModel>
                             <generateApiTests>true</generateApiTests>
                             <generateModelTests>false</generateModelTests>
@@ -463,10 +545,75 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>org.fiware.gaiax.tir.Application</mainClass>
+                            <mainClass>org.fiware.iam.tir.Application</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${version.org.jacoco.maven-plugin}</version>
+                <configuration>
+                    <!-- exclude generated code -->
+                    <excludes>
+                        <exclude>org/fiware/**/api/*</exclude>
+                        <exclude>org/fiware/**/model/*</exclude>
+                        <!-- needs to be excluded, breaks coveralls linking -->
+                        <exclude>**/TrustedIssuerMapperImpl*</exclude>
+                        <exclude>**/NGSIMapperImpl*</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>pre-unit-tests</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <!-- Ensures that the code coverage report for unit tests is created after unit tests have been run -->
+                    <execution>
+                        <id>post-unit-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>pre-integration-test</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <propertyName>failsafe.jacoco.args</propertyName>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>post-integration-test</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>merge-reports</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>merge</goal>
+                        </goals>
+                        <configuration>
+                            <fileSets>
+                                <fileSet>
+                                    <directory>${project.basedir}/</directory>
+                                    <includes>
+                                        <include>*.exec</include>
+                                    </includes>
+                                </fileSet>
+                            </fileSets>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <!-- copy project dependencies -->
             <plugin>
@@ -488,6 +635,32 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- this is very important to avoid classpath conflicts between the micronaut-test-context and the beans present inside the shaded-jar -->
+                    <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+                    <failIfNoTests>true</failIfNoTests>
+                    <argLine>${failsafe.jacoco.args} --add-opens java.base/java.lang=ALL-UNNAMED --add-opens
+                        java.base/java.time=ALL-UNNAMED
+                    </argLine>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration combine.self="override">
@@ -500,6 +673,14 @@
                             <tag>${project.version}</tag>
                         </tags>
                     </to>
+                    <!--                    <extraDirectories>
+                                            <paths>
+                                                <path>
+                                                    <from>LICENSE</from>
+                                                    <into>/licenses</into>
+                                                </path>
+                                            </paths>
+                                        </extraDirectories>-->
                     <container>
                         <labels>
                             <!-- oci labels -->
@@ -547,6 +728,68 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>io.kokuwa.maven</groupId>
+                <artifactId>k3s-maven-plugin</artifactId>
+                <version>${version.io.kokuwa.maven.k3s-plugin}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-test-cluster</id>
+                        <goals>
+                            <goal>create</goal>
+                            <goal>start</goal>
+                            <goal>image</goal>
+                            <goal>kubectl</goal>
+                        </goals>
+                        <configuration>
+                            <manifests>${project.basedir}/src/test/resources/k3s</manifests>
+                            <streamLogs>true</streamLogs>
+                            <portBindings>
+                                <portBinding>1026:1026</portBinding>
+                            </portBindings>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+<profiles>
+    <profile>
+        <id>report-coveralls</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${version.org.jacoco.maven-plugin}</version>
+                    <configuration>
+                        <fileSets>
+                            <fileSet>
+                                <directory>${project.basedir}</directory>
+                                <includes>
+                                    <include>**/*.exec</include>
+                                </includes>
+                            </fileSet>
+                        </fileSets>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.eluder.coveralls</groupId>
+                    <artifactId>coveralls-maven-plugin</artifactId>
+                    <version>${version.org.eluder.coveralls.maven-plugin}</version>
+                    <configuration>
+                        <repoToken>${coveralls.token}</repoToken>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>javax.xml.bind</groupId>
+                            <artifactId>jaxb-api</artifactId>
+                            <version>2.3.1</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+</profiles>
 </project>

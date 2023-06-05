@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Trusted Issuers Registry
   description: |
-    The subset of the [Trusted Issuers Registryas defined by EBSI](https://api-pilot.ebsi.eu/docs/apis/trusted-issuers-registry/v4#/) as currently required by
+    The subset of the [Trusted Issuers Registry as defined by EBSI](https://api-pilot.ebsi.eu/docs/apis/trusted-issuers-registry/v4#/) as currently required by
     the [VCVerifier](https://github.com/FIWARE/VCVerifier).
   version: v3
 tags:
@@ -53,13 +53,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Issuer'
         '400':
-          description: Not found
+          description: Bad Request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '404':
-          description: Bad Request
+          description: Not found
           content:
             application/json:
               schema:
@@ -87,7 +87,10 @@ components:
       in: query
       required: false
       schema:
-        type: number
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
         example: 10
     After:
       name: page[after]
@@ -152,11 +155,11 @@ components:
             $ref: '#/components/schemas/IssuerEntry'
         total:
           description: Total number of items in a collection
-          type: number
+          type: integer
           example: 10
         pageSize:
           description: Number of items to be returned per page
-          type: number
+          type: integer
           example: 5
         links:
           $ref: '#/components/schemas/Links'

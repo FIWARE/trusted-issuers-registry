@@ -1,4 +1,11 @@
 micronaut:
+  metrics:
+    enabled: false
+    export:
+      prometheus:
+        enabled: true
+        step: PT1M
+        descriptions: true
   application:
     name: ${project.artifactId}
   server:
@@ -22,6 +29,9 @@ micronaut:
         url: http://gaia-x-orion-ld:1026
         read-timeout: 30
 ---
+endpoints:
+  prometheus:
+    sensitive: false
 
 general:
   contextUrl: "https://registry.lab.gaia-x.eu/development/api/trusted-shape-registry/v1/shapes/jsonld/trustframework#"
