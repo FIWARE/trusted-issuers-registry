@@ -10,7 +10,7 @@ on:
       - unlabeled
 env:
   REGISTRY: quay.io
-  REPOSITORY: pulledtim
+  REPOSITORY: fiware
 
 jobs:
 
