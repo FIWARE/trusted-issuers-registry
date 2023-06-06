@@ -11,7 +11,7 @@ micronaut:
   server:
     port: 8080
     netty:
-      log-level: TRACE
+      log-level: DEBUG
       max-header-size: 12000
   security:
     enabled: true
@@ -26,7 +26,7 @@ micronaut:
       read-timeout: 30s
       ngsi:
         path: ngsi-ld/v1
-        url: http://gaia-x-orion-ld:1026
+        url: http://ngsi-ld:1026
         read-timeout: 30
 ---
 endpoints:
