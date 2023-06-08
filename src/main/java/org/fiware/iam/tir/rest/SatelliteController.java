@@ -102,12 +102,13 @@ public class SatelliteController implements SatelliteApi {
 			return HttpResponse.notFound();
 		}
 		PartyInfoVO partyInfoVO = new PartyInfoVO().partyInfo(optionalParty.get());
-
-		return HttpResponse.ok(new PartyResponseVO().partyToken(
+		PartyResponseVO prv = new PartyResponseVO().partyToken(
 				createToken(securityService.getAuthentication().map(Principal::getName),
 						Optional.empty(),
 						Map.of(),
-						Map.of("parties_token", OBJECT_MAPPER.convertValue(partyInfoVO, Map.class)))));
+						OBJECT_MAPPER.convertValue(partyInfoVO, Map.class)));
+
+		return HttpResponse.ok(prv);
 	}
 
 	@Secured({ SecurityRule.IS_ANONYMOUS })

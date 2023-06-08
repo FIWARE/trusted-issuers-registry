@@ -101,8 +101,7 @@ public class SatelliteControllerIT extends NGSIBasedTest implements SatelliteApi
                 .withArrayClaim("scope", "iSHARE")
                 .build();
         jwtVerifier.verify(decodedJWT);
-        PartyInfoVO token = decodedJWT.getClaim("parties_token").as(PartyInfoVO.class);
-        PartyVO partyInfo = token.getPartyInfo();
+        PartyVO partyInfo = decodedJWT.getClaim("party_info").as(PartyVO.class);
 
         assertThat(partyInfo.getCertificates().get(0).getX5c()).isEqualTo(strip(applicationConfig.iShareConfig.getParties().get(0).crt()));
     }
