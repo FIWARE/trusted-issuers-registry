@@ -9,7 +9,8 @@
         </encoder>
     </appender>
 
-    <root level="DEBUG">
+    <logger name="org.fiware.iam" level="DEBUG" />
+    <root level="INFO">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>
