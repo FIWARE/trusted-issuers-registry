@@ -108,15 +108,16 @@ public class SatelliteController implements SatelliteApi {
     @Override
     public HttpResponse<TokenResponseVO> getToken(@Nullable String grantType, @Nullable String clientId, @Nullable String scope,
                                                   @Nullable String clientAssertionType, @Nullable String clientAssertion) {
-        if (!grantType.equals(ALLOWED_GRANT_TYPE)) {
-            log.warn("Grant Type {} is the expected {}", grantType, ALLOWED_GRANT_TYPE);
+        log.debug("Attempting to get Token for {},{},{},{},{}", grantType, clientId, scope, clientAssertionType, clientAssertion);
+        if (!ALLOWED_GRANT_TYPE.equals(grantType)) {
+            log.warn("Grant Type {} is not the expected '{}'", grantType, ALLOWED_GRANT_TYPE);
             throw new IllegalArgumentException(String.format("Grant_type needs to be %s.", ALLOWED_GRANT_TYPE));
         }
-        if (!Arrays.asList(scope.split(SCOPE_DELIMITER)).contains(I_SHARE_SCOPE)) {
-            log.warn("Scope {} does not contain the expected {}", scope, I_SHARE_SCOPE);
+        if (scope == null || !Arrays.asList(scope.split(SCOPE_DELIMITER)).contains(I_SHARE_SCOPE)) {
+            log.warn("Scope {} does not contain the expected '{}'", scope, I_SHARE_SCOPE);
             throw new IllegalArgumentException(String.format("Scope needs to contain %s.", I_SHARE_SCOPE));
         }
-        if (!clientAssertionType.equals(ALLOWED_ASSERTION_TYPE)) {
+        if (!ALLOWED_ASSERTION_TYPE.equals(clientAssertionType)) {
             log.warn("Client Assertion Type {} is the expected {}", clientAssertionType, ALLOWED_ASSERTION_TYPE);
             throw new IllegalArgumentException(
                     String.format("Assertion type needs to be %s.", ALLOWED_ASSERTION_TYPE));

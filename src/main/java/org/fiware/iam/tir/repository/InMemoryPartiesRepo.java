@@ -5,7 +5,6 @@ import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.fiware.iam.satellite.model.TrustedCAVO;
 import org.fiware.iam.tir.auth.CertificateMapper;
-import org.fiware.iam.tir.auth.JWTService;
 import org.fiware.iam.tir.configuration.Party;
 import org.fiware.iam.tir.configuration.SatelliteProperties;
 import org.fiware.iam.tir.issuers.IssuersProvider;
@@ -29,7 +28,7 @@ public class InMemoryPartiesRepo implements PartiesRepo {
     private final CertificateMapper certificateMapper;
 
     public InMemoryPartiesRepo(SatelliteProperties satelliteProperties, IssuersProvider issuersProvider, DidService didService, CertificateMapper certificateMapper) {
-        this.parties = satelliteProperties.getParties();
+        this.parties = new ArrayList<>(satelliteProperties.getParties());
         this.satelliteProperties = satelliteProperties;
         this.issuersProvider = issuersProvider;
         this.didService = didService;
@@ -65,20 +64,22 @@ public class InMemoryPartiesRepo implements PartiesRepo {
 
         issuersProvider.getAllTrustedIssuers().forEach(ti -> {
             try {
+                log.debug("Attempting to add issuer {}", ti.getIssuer());
                 Optional<DidDocument> document = didService.retrieveDidDocument(ti.getIssuer());
                 if (document.isEmpty()) {
                     log.warn("Could not retrieve DID document for DID {}", ti.getIssuer());
                     return;
                 }
                 DidDocument didDocument = document.get();
+                log.debug("Retrieved DID document {}", didDocument);
                 Optional<String> certificate = didService.getCertificate(didDocument);
                 if (certificate.isEmpty()) {
                     log.warn("Could not retrieve certificate for DID {}", ti.getIssuer());
                     return;
                 }
-                updatedParties.add(
-                        new Party(didDocument.getId(), didDocument.getId(), didDocument.getId(), "Active", certificate.get()));
-
+                Party party = new Party(didDocument.getId(), didDocument.getId(), didDocument.getId(), "Active", certificate.get());
+                log.debug("Adding party {}", party);
+                updatedParties.add(party);
             } catch (RuntimeException e) {
                 log.warn("Cannot resolve issuer {}, skip.", ti.getIssuer(), e);
             }
@@ -98,10 +99,8 @@ public class InMemoryPartiesRepo implements PartiesRepo {
         List<TrustedCAVO> trustedCAVOS = new ArrayList<>();
 
         satelliteProperties.getTrustedList().stream()
-                .forEach(trustedCA -> {
-                    toTrustedCaVO(certificateMapper.getCertificates(trustedCA.crt()).get(0)).ifPresent(
-                            trustedCAVOS::add);
-                });
+                .forEach(trustedCA -> toTrustedCaVO(certificateMapper.getCertificates(trustedCA.crt()).get(0)).ifPresent(
+                        trustedCAVOS::add));
 
         return trustedCAVOS;
     }
