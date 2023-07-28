@@ -3,6 +3,7 @@ package org.fiware.iam.tir.repository;
 import io.micronaut.scheduling.annotation.Scheduled;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
+import org.fiware.iam.did.model.DIDDocumentVO;
 import org.fiware.iam.satellite.model.TrustedCAVO;
 import org.fiware.iam.tir.auth.CertificateMapper;
 import org.fiware.iam.tir.configuration.Party;
@@ -65,20 +66,21 @@ public class InMemoryPartiesRepo implements PartiesRepo {
         issuersProvider.getAllTrustedIssuers().forEach(ti -> {
             try {
                 log.debug("Attempting to add issuer {}", ti.getIssuer());
-                Optional<DidDocument> document = didService.retrieveDidDocument(ti.getIssuer());
+                Optional<DIDDocumentVO> document = didService.retrieveDidDocument(ti.getIssuer());
                 if (document.isEmpty()) {
                     log.warn("Could not retrieve DID document for DID {}", ti.getIssuer());
                     return;
                 }
-                DidDocument didDocument = document.get();
+                DIDDocumentVO didDocument = document.get();
                 log.debug("Retrieved DID document {}", didDocument);
                 Optional<String> certificate = didService.getCertificate(didDocument);
                 if (certificate.isEmpty()) {
                     log.warn("Could not retrieve certificate for DID {}", ti.getIssuer());
                     return;
                 }
-                Party party = new Party(didDocument.getId(), didDocument.getId(), didDocument.getId(), "Active", certificate.get());
-                log.debug("Adding party {}", party);
+                Party party = new Party(didDocument.getId(), didDocument.getId(), didDocument.getId(), "Active", certificate.get(), didDocument);
+                log.debug("Adding party {}", party.id());
+                log.trace("Adding party {}", party);
                 updatedParties.add(party);
             } catch (RuntimeException e) {
                 log.warn("Cannot resolve issuer {}, skip.", ti.getIssuer(), e);

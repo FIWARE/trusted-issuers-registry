@@ -5,6 +5,7 @@ import io.github.wistefan.mapping.AdditionalPropertyMixin;
 import io.github.wistefan.mapping.JavaObjectMapper;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.fiware.iam.common.configuration.GeneralProperties;
 import org.fiware.iam.tir.issuers.TrustedIssuer;
@@ -22,6 +23,7 @@ import java.util.concurrent.Callable;
 public abstract class NGSIBasedTest {
     private final EntitiesApiClient entitiesApiClient;
     private final JavaObjectMapper javaObjectMapper;
+    @Getter
     private final ObjectMapper objectMapper;
     private final GeneralProperties generalProperties;
 

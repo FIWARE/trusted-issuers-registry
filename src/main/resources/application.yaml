@@ -6,6 +6,8 @@ micronaut:
         enabled: true
         step: PT1M
         descriptions: true
+      statsd:
+        enabled: false
   application:
     name: ${project.artifactId}
   server:

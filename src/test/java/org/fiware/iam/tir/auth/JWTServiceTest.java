@@ -54,7 +54,7 @@ public class JWTServiceTest {
             when(properties.getTrustedList()).thenReturn(List.of(new TrustedCA("someCA", trustedCACrt)));
         }
         if (partyCrt != null) {
-            when(partyRepo.getPartyById(anyString())).thenReturn(Optional.of(new Party("id", "did", "name", "status", partyCrt)));
+            when(partyRepo.getPartyById(anyString())).thenReturn(Optional.of(new Party("id", "did", "name", "status", partyCrt,null)));
         }
         try {
             classUnderTest.validateJWT(jwtToken);
