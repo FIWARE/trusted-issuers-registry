@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.fiware.iam.did.api.DidApi;
 import org.fiware.iam.did.model.DIDDocumentVO;
+import org.fiware.iam.tir.auth.IShareJWT;
 import org.fiware.iam.tir.configuration.Party;
 import org.fiware.iam.tir.repository.DidDocumentMapper;
 import org.fiware.iam.tir.repository.PartiesRepo;
@@ -23,7 +24,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 @Controller("${general.basepath:/}")
-@Secured(SecurityRule.IS_ANONYMOUS)
+@Secured(SecurityRule.IS_AUTHENTICATED)
 public class DidRegistry implements DidApi {
 
     private final DidDocumentMapper didDocumentMapper;

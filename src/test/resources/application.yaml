@@ -14,10 +14,10 @@ micronaut:
     token:
       jwt:
         enabled: true
-#        signatures:
-#          secret:
-#            generator:
-#              secret: pleaseChangeThisSecretForANewOne
+        signatures:
+          secret:
+            generator:
+              secret: pleaseChangeThisSecretForANewOne
   http:
     services:
       read-timeout: 30s

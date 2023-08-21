@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.fiware.iam.satellite.api.SatelliteApi;
 import org.fiware.iam.satellite.model.*;
 import org.fiware.iam.tir.auth.CertificateMapper;
+import org.fiware.iam.tir.auth.IShareJWT;
 import org.fiware.iam.tir.auth.JWTService;
 import org.fiware.iam.tir.configuration.Party;
 import org.fiware.iam.tir.configuration.SatelliteProperties;
@@ -48,6 +49,7 @@ public class SatelliteController implements SatelliteApi {
     private final CertificateMapper certificateMapper;
 
     @Secured(SecurityRule.IS_AUTHENTICATED)
+    @IShareJWT
     @Override
     public HttpResponse<PartiesResponseVO> getParties(@Nullable String eori, @Nullable String certificateSubjectName) {
         log.debug("Attempting to retrieve parties with eori {} and certificate subject name", eori, certificateSubjectName);
@@ -86,6 +88,7 @@ public class SatelliteController implements SatelliteApi {
     }
 
     @Secured(SecurityRule.IS_AUTHENTICATED)
+    @IShareJWT
     @Override
     public HttpResponse<PartyResponseVO> getPartyById(String partyId) {
         log.debug("Attempting to retrieve party {}", partyId);
@@ -105,6 +108,7 @@ public class SatelliteController implements SatelliteApi {
     }
 
     @Secured({SecurityRule.IS_ANONYMOUS})
+    @IShareJWT
     @Override
     public HttpResponse<TokenResponseVO> getToken(@Nullable String grantType, @Nullable String clientId, @Nullable String scope,
                                                   @Nullable String clientAssertionType, @Nullable String clientAssertion) {
@@ -136,6 +140,7 @@ public class SatelliteController implements SatelliteApi {
     }
 
     @Secured(SecurityRule.IS_AUTHENTICATED)
+    @IShareJWT
     @Override
     public HttpResponse<TrustedListResponseVO> getTrustedList() {
         List<TrustedCAVO> trustedCAs = partiesRepo.getTrustedCAs();
