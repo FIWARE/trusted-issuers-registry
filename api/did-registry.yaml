@@ -101,11 +101,13 @@ components:
             oneOf:
               - $ref: '#/components/schemas/JsonWebKey2020VerificationMethod'
               - $ref: '#/components/schemas/RsaVerificationKey2018VerificationMethod'
+              - $ref: '#/components/schemas/Ed25519VerificationKey2019'
             discriminator:
               propertyName: type
               mapping:
                 RsaVerificationKey2018: '#/components/schemas/RsaVerificationKey2018VerificationMethod'
                 JsonWebKey2020: '#/components/schemas/JsonWebKey2020VerificationMethod'
+                Ed25519VerificationKey2019: '#/components/schemas/Ed25519VerificationKey2019'
       required:
         - id
         - '@context'
@@ -130,6 +132,16 @@ components:
             publicKeyJwk:
               $ref: '#/components/schemas/JWK'
     JsonWebKey2020VerificationMethod:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/VerificationMethod'
+        - type: object
+          properties:
+            controller:
+              type: string
+            publicKeyJwk:
+              $ref: '#/components/schemas/JWK'
+    Ed25519VerificationKey2019:
       type: object
       allOf:
         - $ref: '#/components/schemas/VerificationMethod'

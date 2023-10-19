@@ -8,6 +8,7 @@ import io.micronaut.http.client.exceptions.HttpClientException;
 import lombok.RequiredArgsConstructor;
 import org.fiware.iam.did.model.DIDDocumentVO;
 import org.fiware.iam.did.model.DIDDocumentVerificationMethodInnerVO;
+import org.fiware.iam.did.model.Ed25519VerificationKey2019VO;
 import org.fiware.iam.did.model.JsonWebKey2020VerificationMethodVO;
 import org.fiware.iam.did.model.RsaVerificationKey2018VerificationMethodVO;
 
@@ -57,7 +58,9 @@ public class DidWebService implements DidService {
                         return ((JsonWebKey2020VerificationMethodVO) verificationMethodVO).getPublicKeyJwk();
                     } else if (verificationMethodVO instanceof RsaVerificationKey2018VerificationMethodVO) {
                         return ((RsaVerificationKey2018VerificationMethodVO) verificationMethodVO).getPublicKeyJwk();
-                    } else {
+                    } else if (verificationMethodVO instanceof RsaVerificationKey2018VerificationMethodVO) {
+                        return ((Ed25519VerificationKey2019VO) verificationMethodVO).getPublicKeyJwk();
+                    }else {
                         throw new IllegalArgumentException("Verification method type %s not supported.".formatted(verificationMethodVO.getType()));
                     }
                 })
