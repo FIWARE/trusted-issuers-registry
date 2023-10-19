@@ -58,7 +58,7 @@ public class DidWebService implements DidService {
                         return ((JsonWebKey2020VerificationMethodVO) verificationMethodVO).getPublicKeyJwk();
                     } else if (verificationMethodVO instanceof RsaVerificationKey2018VerificationMethodVO) {
                         return ((RsaVerificationKey2018VerificationMethodVO) verificationMethodVO).getPublicKeyJwk();
-                    } else if (verificationMethodVO instanceof RsaVerificationKey2018VerificationMethodVO) {
+                    } else if (verificationMethodVO instanceof Ed25519VerificationKey2019VO) {
                         return ((Ed25519VerificationKey2019VO) verificationMethodVO).getPublicKeyJwk();
                     }else {
                         throw new IllegalArgumentException("Verification method type %s not supported.".formatted(verificationMethodVO.getType()));
