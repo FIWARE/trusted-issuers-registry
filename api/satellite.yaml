@@ -195,6 +195,8 @@ components:
       properties:
         party_id:
           type: string
+        party_did:
+          type: string
         party_name:
           type: string
         adherence:

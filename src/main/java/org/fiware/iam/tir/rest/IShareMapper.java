@@ -6,7 +6,6 @@ import org.fiware.iam.satellite.model.AdherenceVO;
 import org.fiware.iam.satellite.model.CertificateVO;
 import org.fiware.iam.satellite.model.PartyVO;
 import org.fiware.iam.tir.auth.CertificateMapper;
-import org.fiware.iam.tir.auth.JWTService;
 import org.fiware.iam.tir.configuration.Party;
 
 import javax.inject.Singleton;
@@ -28,6 +27,7 @@ public class IShareMapper {
     public PartyVO partyToPartyVO(Party party) {
         return new PartyVO()
                 .partyId(party.id())
+                .partyDid(party.did())
                 .partyName(party.name())
                 .adherence(new AdherenceVO().status(party.status()))
                 .certificates(toCertificateVO(getClientCertificate(party)));
