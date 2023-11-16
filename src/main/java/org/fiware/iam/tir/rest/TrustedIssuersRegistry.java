@@ -19,9 +19,7 @@ import javax.validation.constraints.Min;
 
 @RequiredArgsConstructor
 @Slf4j
-@Controller("${general.basepath:/}")
-@Secured(SecurityRule.IS_ANONYMOUS)
-public class TrustedIssuersRegistry implements TirApi {
+abstract class TrustedIssuersRegistry implements TirApi {
     private final IssuersProvider issuersProvider;
     private final TrustedIssuerMapper mapper;
 
