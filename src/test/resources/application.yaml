@@ -276,3 +276,6 @@ satellite:
         gcT/d0JDrvYyw9K/9FCPi3dmOdjSUEPwFrPZMPlDZ/ogoKLZaOUQ6PGuSFllbkzG
         YPTcYd127kzwmc+Kdjxrhh0WRvLPfrbEoJQStw==
         -----END CERTIFICATE-----
+
+allowedVCTypes:
+  - VerifiableCredential
