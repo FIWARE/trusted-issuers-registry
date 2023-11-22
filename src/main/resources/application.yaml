@@ -36,6 +36,7 @@ endpoints:
     sensitive: false
 
 general:
+  roleTarget: did:elsi:target
   trustedIssuersRegistry:
     authenticated: false
   contextUrl: "https://registry.lab.gaia-x.eu/development/api/trusted-shape-registry/v1/shapes/jsonld/trustframework#"
@@ -285,6 +286,3 @@ satellite:
         YURyhqWqqW2u7UehYs6emmSwYv8j0v4CzpH517jp2RJNyinI3TZmgD0AAKzyJAl/
         Zqat8t/baTS3TUdIKg==
         -----END CERTIFICATE-----
-
-allowedVCTypes:
-  - VerifiableCredential

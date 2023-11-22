@@ -27,6 +27,7 @@ micronaut:
         read-timeout: 30
 
 general:
+  roleTarget: did:elsi:target
   trustedIssuersRegistry:
     authenticated: false
   contextUrl: "https://registry.lab.gaia-x.eu/development/api/trusted-shape-registry/v1/shapes/jsonld/trustframework#"
@@ -276,6 +277,3 @@ satellite:
         gcT/d0JDrvYyw9K/9FCPi3dmOdjSUEPwFrPZMPlDZ/ogoKLZaOUQ6PGuSFllbkzG
         YPTcYd127kzwmc+Kdjxrhh0WRvLPfrbEoJQStw==
         -----END CERTIFICATE-----
-
-allowedVCTypes:
-  - VerifiableCredential

@@ -27,4 +27,9 @@ public class GeneralProperties {
 	 */
 	private String tenant = null;
 
+	/**
+	 * DID of the target service, for which the role is granted
+	 */
+	private String roleTarget;
+
 }
