@@ -1,5 +1,6 @@
 package org.fiware.iam.tir.repository;
 
+import io.micronaut.http.annotation.Part;
 import io.micronaut.scheduling.annotation.Scheduled;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -9,14 +10,18 @@ import org.fiware.iam.tir.auth.CertificateMapper;
 import org.fiware.iam.tir.configuration.Party;
 import org.fiware.iam.tir.configuration.SatelliteProperties;
 import org.fiware.iam.tir.issuers.IssuersProvider;
+import org.fiware.iam.tir.issuers.TrustedIssuer;
+import reactor.core.publisher.Mono;
 
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Slf4j
 @Singleton
@@ -64,35 +69,32 @@ public class InMemoryPartiesRepo implements PartiesRepo {
         List<Party> updatedParties = new ArrayList<>(satelliteProperties.getParties());
 
         issuersProvider.getAllTrustedIssuers()
-                .subscribe(til -> {
-                    til.forEach(ti -> {
-                        try {
-                            log.debug("Attempting to add issuer {}", ti.getIssuer());
-                            Optional<DIDDocumentVO> document = didService.retrieveDidDocument(ti.getIssuer());
-                            if (document.isEmpty()) {
-                                log.warn("Could not retrieve DID document for DID {}", ti.getIssuer());
-                                return;
-                            }
-                            DIDDocumentVO didDocument = document.get();
-                            log.debug("Retrieved DID document {}", didDocument);
-                            Optional<String> certificate = didService.getCertificate(didDocument);
-                            if (certificate.isEmpty()) {
-                                log.warn("Could not retrieve certificate for DID {}", ti.getIssuer());
-                                return;
-                            }
-                            Party party = new Party(didDocument.getId(), didDocument.getId(), didDocument.getId(), "Active", certificate.get(), didDocument);
-                            log.debug("Adding party {}", party.id());
-                            log.trace("Adding party {}", party);
+                .flatMap(til -> Mono.zip(til.stream().map(this::getPartyForIssuer).toList(), parties -> Arrays.stream(parties).toList()))
+                .subscribe(partiesList -> {
+                    for (Object partyObject : partiesList) {
+                        if (partyObject instanceof Party party) {
                             updatedParties.add(party);
-                        } catch (RuntimeException e) {
-                            log.warn("Cannot resolve issuer {}, skip.", ti.getIssuer(), e);
+                        } else {
+                            log.warn("Object {} is not a party.", partyObject);
                         }
-                    });
+                    }
                     parties.clear();
                     parties.addAll(updatedParties);
                 });
     }
 
+
+    private Mono<Party> getPartyForIssuer(TrustedIssuer trustedIssuer) {
+        return didService.retrieveDidDocument(trustedIssuer.getIssuer())
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .flatMap(didDoc -> didService
+                        .getCertificate(didDoc)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .map(cert -> new Party(didDoc.getId(), didDoc.getId(), didDoc.getId(), "Active", cert, didDoc))
+                );
+    }
 
     @Override
     public List<Party> getParties() {

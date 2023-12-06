@@ -51,7 +51,7 @@ public class DidServiceTest {
     void retrieveDidDocument(String did, String expectedUri, boolean errorExpected) {
         try {
             when(blockingHttpClient.exchange(eq(expectedUri), any())).thenReturn(HttpResponse.ok().body(new DIDDocumentVO()));
-            assertThat(classUnderTest.retrieveDidDocument(did)).isPresent();
+            assertThat(classUnderTest.retrieveDidDocument(did).block()).isPresent();
             if (errorExpected) {
                 fail("Should have caused error");
             }
@@ -81,7 +81,7 @@ public class DidServiceTest {
             when(blockingHttpClient.retrieve(anyString())).thenThrow(new HttpClientResponseException("Fail",HttpResponse.notFound()));
         }
         try {
-            Optional<String> certificate = classUnderTest.getCertificate(didDocument);
+            Optional<String> certificate = classUnderTest.getCertificate(didDocument).block();
             assertThat(certificate.isPresent()).isEqualTo(resultExpected);
             if (errorExpected) {
                 fail("Should have caused error");
