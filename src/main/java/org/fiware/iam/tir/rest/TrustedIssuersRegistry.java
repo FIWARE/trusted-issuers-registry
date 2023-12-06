@@ -13,6 +13,7 @@ import org.fiware.iam.tir.issuers.IssuersProvider;
 import org.fiware.iam.tir.issuers.TrustedIssuerMapper;
 import org.fiware.iam.tir.model.IssuerVO;
 import org.fiware.iam.tir.model.IssuersResponseVO;
+import reactor.core.publisher.Mono;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -24,16 +25,16 @@ abstract class TrustedIssuersRegistry implements TirApi {
     private final TrustedIssuerMapper mapper;
 
     @Override
-    public HttpResponse<IssuerVO> getIssuer(@NonNull String did) {
+    public Mono<HttpResponse<IssuerVO>> getIssuer(@NonNull String did) {
         return issuersProvider
                 .getAllTrustedIssuers()
-                .stream()
-                .filter(trustedIssuer -> trustedIssuer != null && trustedIssuer.getIssuer() != null)
-                .filter(issuer -> issuer.getIssuer().equalsIgnoreCase(did))
-                .map(mapper::map)
-                .findAny()
-                .map(HttpResponse::ok)
-                .orElseGet(HttpResponse::notFound);
+                .map(til -> til.stream()
+                        .filter(trustedIssuer -> trustedIssuer != null && trustedIssuer.getIssuer() != null)
+                        .filter(issuer -> issuer.getIssuer().equalsIgnoreCase(did))
+                        .map(mapper::map)
+                        .findAny()
+                        .map(HttpResponse::ok)
+                        .orElseGet(HttpResponse::notFound));
     }
 
     /**
@@ -45,8 +46,9 @@ abstract class TrustedIssuersRegistry implements TirApi {
      * @return
      */
     @Override
-    public HttpResponse<IssuersResponseVO> getIssuers(@Nullable @Min(1) @Max(100) Integer pageSize, @Nullable String pageAfter) {
-        return HttpResponse.ok(mapper.map(issuersProvider
-                .getAllTrustedIssuers()));
+    public Mono<HttpResponse<IssuersResponseVO>> getIssuers(@Nullable @Min(1) @Max(100) Integer pageSize, @Nullable String pageAfter) {
+        return issuersProvider.getAllTrustedIssuers()
+                .map(mapper::map)
+                .map(HttpResponse::ok);
     }
 }

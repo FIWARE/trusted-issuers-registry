@@ -11,7 +11,7 @@ import org.fiware.iam.common.domain.EntityWithId;
 
 
 /**
- * Minimalistic representation of a VC https://www.w3.org/TR/vc-data-model/
+ * Minimalistic representation of a VC {@see https://www.w3.org/TR/vc-data-model/}
  */
 @EqualsAndHashCode(callSuper = true)
 @MappingEnabled(entityType = TrustedIssuer.TYPE_TRUSTED_ISSUER)
