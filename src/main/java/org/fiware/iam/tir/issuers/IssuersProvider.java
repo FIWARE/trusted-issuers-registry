@@ -25,10 +25,9 @@ public class IssuersProvider {
     /**
      * @return The first 1000 Trusted issuers that are available
      */
-    public List<TrustedIssuer> getAllTrustedIssuers() {
-        Mono<List<TrustedIssuer>> entities = trustedIssuersRepository.findEntities(0, 1000, TrustedIssuer.TYPE_TRUSTED_ISSUER,
+    public Mono<List<TrustedIssuer>> getAllTrustedIssuers() {
+       return trustedIssuersRepository.findEntities(0, 1000, TrustedIssuer.TYPE_TRUSTED_ISSUER,
                 TrustedIssuer.class);
-        return Optional.ofNullable(entities.block(Duration.ofSeconds(30))).orElse(emptyList());
     }
 
 }

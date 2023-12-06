@@ -63,31 +63,34 @@ public class InMemoryPartiesRepo implements PartiesRepo {
     public void updateParties() {
         List<Party> updatedParties = new ArrayList<>(satelliteProperties.getParties());
 
-        issuersProvider.getAllTrustedIssuers().forEach(ti -> {
-            try {
-                log.debug("Attempting to add issuer {}", ti.getIssuer());
-                Optional<DIDDocumentVO> document = didService.retrieveDidDocument(ti.getIssuer());
-                if (document.isEmpty()) {
-                    log.warn("Could not retrieve DID document for DID {}", ti.getIssuer());
-                    return;
-                }
-                DIDDocumentVO didDocument = document.get();
-                log.debug("Retrieved DID document {}", didDocument);
-                Optional<String> certificate = didService.getCertificate(didDocument);
-                if (certificate.isEmpty()) {
-                    log.warn("Could not retrieve certificate for DID {}", ti.getIssuer());
-                    return;
-                }
-                Party party = new Party(didDocument.getId(), didDocument.getId(), didDocument.getId(), "Active", certificate.get(), didDocument);
-                log.debug("Adding party {}", party.id());
-                log.trace("Adding party {}", party);
-                updatedParties.add(party);
-            } catch (RuntimeException e) {
-                log.warn("Cannot resolve issuer {}, skip.", ti.getIssuer(), e);
-            }
-        });
-        parties.clear();
-        parties.addAll(updatedParties);
+        issuersProvider.getAllTrustedIssuers()
+                .subscribe(til -> {
+                    til.forEach(ti -> {
+                        try {
+                            log.debug("Attempting to add issuer {}", ti.getIssuer());
+                            Optional<DIDDocumentVO> document = didService.retrieveDidDocument(ti.getIssuer());
+                            if (document.isEmpty()) {
+                                log.warn("Could not retrieve DID document for DID {}", ti.getIssuer());
+                                return;
+                            }
+                            DIDDocumentVO didDocument = document.get();
+                            log.debug("Retrieved DID document {}", didDocument);
+                            Optional<String> certificate = didService.getCertificate(didDocument);
+                            if (certificate.isEmpty()) {
+                                log.warn("Could not retrieve certificate for DID {}", ti.getIssuer());
+                                return;
+                            }
+                            Party party = new Party(didDocument.getId(), didDocument.getId(), didDocument.getId(), "Active", certificate.get(), didDocument);
+                            log.debug("Adding party {}", party.id());
+                            log.trace("Adding party {}", party);
+                            updatedParties.add(party);
+                        } catch (RuntimeException e) {
+                            log.warn("Cannot resolve issuer {}, skip.", ti.getIssuer(), e);
+                        }
+                    });
+                    parties.clear();
+                    parties.addAll(updatedParties);
+                });
     }
 
 
