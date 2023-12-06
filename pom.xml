@@ -50,7 +50,7 @@
         <project.contact.email>tim.smyth@fiware.org</project.contact.email>
 
         <!-- div -->
-        <version.io.kokuwa.micronaut.logging>4.0.1</version.io.kokuwa.micronaut.logging>
+        <version.io.kokuwa.micronaut.logging>3.0.4</version.io.kokuwa.micronaut.logging>
         <ngsi-ld-java-mapping.version>0.1.2</ngsi-ld-java-mapping.version>
         <commons-codec.version>1.15</commons-codec.version>
         <logback-classic.version>1.2.3</logback-classic.version>
