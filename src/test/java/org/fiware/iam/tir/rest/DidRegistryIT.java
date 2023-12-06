@@ -65,8 +65,8 @@ public class DidRegistryIT extends NGSIBasedTest implements DidApiTestSpec {
     @Override
     public void getDIDDocument200() throws Exception {
 
-        when(didService.retrieveDidDocument("did:web:someDid")).thenReturn(Optional.of(SOME_DID_DOCUMENT));
-        when(didService.getCertificate(SOME_DID_DOCUMENT)).thenReturn(Optional.of("someCert"));
+        when(didService.retrieveDidDocument("did:web:someDid").block()).thenReturn(Optional.of(SOME_DID_DOCUMENT));
+        when(didService.getCertificate(SOME_DID_DOCUMENT).block()).thenReturn(Optional.of("someCert"));
 
         createIssuer(new TrustedIssuer("did:web:someId").setIssuer("did:web:someDid"));
         partyRepo.updateParties();
