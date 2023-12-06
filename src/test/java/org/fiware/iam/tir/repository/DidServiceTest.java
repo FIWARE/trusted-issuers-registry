@@ -17,10 +17,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Flow;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,12 +52,12 @@ public class DidServiceTest {
     @MethodSource("didDocuments")
     void retrieveDidDocument(String did, String expectedUri, boolean errorExpected) {
         try {
-            when(blockingHttpClient.exchange(eq(expectedUri), any())).thenReturn(HttpResponse.ok().body(new DIDDocumentVO()));
+            when(httpClient.exchange(eq(expectedUri), any())).thenReturn(Mono.just(HttpResponse.ok().body(new DIDDocumentVO())));
             assertThat(classUnderTest.retrieveDidDocument(did).block()).isPresent();
             if (errorExpected) {
                 fail("Should have caused error");
             }
-            verify(blockingHttpClient, times(1)).exchange(expectedUri, DIDDocumentVO.class);
+            verify(httpClient, times(1)).exchange(expectedUri, DIDDocumentVO.class);
         } catch (Exception e) {
             if (!errorExpected) {
                 throw e;
@@ -75,10 +77,10 @@ public class DidServiceTest {
     @ParameterizedTest
     @MethodSource("certificates")
     void getCertificate(DIDDocumentVO didDocument, String expectedUrl, boolean errorExpected, boolean resultExpected) {
-        if(expectedUrl!= null){
-            when(blockingHttpClient.retrieve(expectedUrl)).thenReturn("certificate");
-        }else{
-            when(blockingHttpClient.retrieve(anyString())).thenThrow(new HttpClientResponseException("Fail",HttpResponse.notFound()));
+        if (expectedUrl != null) {
+            when(httpClient.retrieve(expectedUrl)).thenReturn(Mono.just("certificate"));
+        } else {
+            when(httpClient.retrieve(anyString())).thenThrow(new HttpClientResponseException("Fail", HttpResponse.notFound()));
         }
         try {
             Optional<String> certificate = classUnderTest.getCertificate(didDocument).block();
@@ -86,8 +88,8 @@ public class DidServiceTest {
             if (errorExpected) {
                 fail("Should have caused error");
             }
-        }catch (Exception e){
-            if(!errorExpected){
+        } catch (Exception e) {
+            if (!errorExpected) {
                 throw e;
             }
         }
