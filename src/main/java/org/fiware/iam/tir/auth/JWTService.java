@@ -59,7 +59,7 @@ public class JWTService {
     public DecodedJWT validateJWT(String jwtString) {
         DecodedJWT decodedJWT = JWT.decode(jwtString);
         List<String> certs = decodedJWT.getHeaderClaim("x5c").asList(String.class);
-        if (certs.size() < 3) {
+        if (certs.isEmpty()) {
             throw new IllegalArgumentException("Did not receive a full x5c chain.");
         }
 
