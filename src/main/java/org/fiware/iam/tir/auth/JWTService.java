@@ -59,14 +59,14 @@ public class JWTService {
     public DecodedJWT validateJWT(String jwtString) {
         DecodedJWT decodedJWT = JWT.decode(jwtString);
         List<String> certs = decodedJWT.getHeaderClaim("x5c").asList(String.class);
-        if (certs.size() != 3) {
+        if (certs.size() < 3) {
             throw new IllegalArgumentException("Did not receive a full x5c chain.");
         }
 
         validateCertificateChain(certs);
 
         String clientCert = certs.get(0);
-        String caCert = certs.get(2);
+        String caCert = certs.get(certs.size()-1);
         try {
             JWT.require(Algorithm.RSA256(certificateMapper.getPublicKey(clientCert))).build().verify(jwtString);
         } catch (JWTVerificationException jwtVerificationException) {
