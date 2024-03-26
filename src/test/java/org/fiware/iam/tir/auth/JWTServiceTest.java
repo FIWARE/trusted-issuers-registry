@@ -72,6 +72,7 @@ public class JWTServiceTest {
     private static Stream<Arguments> createJWTs() {
         List<Arguments> testCases = new ArrayList<>();
         testCases.add(Arguments.of("HappyPathTrustedCA", createSignedJWTClientToken("client_fiware.yaml"), true, TRUSTED_CA_FIWARE_CLIENT, null));
+        testCases.add(Arguments.of("CAOnly", createSignedJWTClientToken("client_fiware_caonly.yaml"), true, TRUSTED_CA_FIWARE, null));
         testCases.add(Arguments.of("HappyPathClientIsKnownParty", createSignedJWTClientToken("client_fiware.yaml"), true, null, CLIENT_CRT));
         testCases.add(Arguments.of("NoCA", createSignedJWTClientToken("client_fiware.yaml"), false, null, null));
         testCases.add(Arguments.of("PartyNotRegistered", createSignedJWTClientToken("client_invalid.yaml"), false, null, CLIENT_CRT));
@@ -95,6 +96,45 @@ public class JWTServiceTest {
                 .withHeader(Map.of("x5c", clientConfig.getEncodedCertificateChain()))
                 .sign(Algorithm.RSA256(clientConfig.getPublicKey(), clientConfig.getPrivateKey()));
     }
+
+    private static final String TRUSTED_CA_FIWARE = """
+            -----BEGIN CERTIFICATE-----
+               MIIGIzCCBAugAwIBAgIUZMKHdNzKZepx/dRK8DE9vrQKjzcwDQYJKoZIhvcNAQEL
+               BQAwgaAxCzAJBgNVBAYTAkRFMQ8wDQYDVQQIDAZCZXJsaW4xDzANBgNVBAcMBkJl
+               cmxpbjEWMBQGA1UECgwNRklXQVJFIENsaWVudDEWMBQGA1UEAwwNRklXQVJFLUNs
+               aWVudDEgMB4GCSqGSIb3DQEJARYRY2xpZW50QGZpd2FyZS5vcmcxHTAbBgNVBAUT
+               FEVVLkVPUkkuRklXQVJFQ0xJRU5UMB4XDTI0MDMyNjE0MDQ1NFoXDTM0MDMyNDE0
+               MDQ1NFowgaAxCzAJBgNVBAYTAkRFMQ8wDQYDVQQIDAZCZXJsaW4xDzANBgNVBAcM
+               BkJlcmxpbjEWMBQGA1UECgwNRklXQVJFIENsaWVudDEWMBQGA1UEAwwNRklXQVJF
+               LUNsaWVudDEgMB4GCSqGSIb3DQEJARYRY2xpZW50QGZpd2FyZS5vcmcxHTAbBgNV
+               BAUTFEVVLkVPUkkuRklXQVJFQ0xJRU5UMIICIjANBgkqhkiG9w0BAQEFAAOCAg8A
+               MIICCgKCAgEAxHNVcZfNHH5Agi5s0c/gx+kcOGwUaEdvhn/FjjhsmVDWsFegpn7P
+               gFpiwgy9G/1xNZeDxpEKyvEdsTwJzB0eZoi9mczUQJagn+nCyIXyTzf10VR46g9J
+               Gh0FutB0vgAXxsNYPz6D60DcN/rODjJ/ZyAHIy9kwEGrp+XQKPyyHUiXNHuAa2Qv
+               Zp4SCCLZNUXoDtgZSiiSYT9mL3RnTxkToTWEvIfY7+FdIHUfX0ajyTET1shGczbd
+               PsG9/YdJXyl5MpUi9eFDubYrxMpvBgZqQhAraAJI7Ygj8sDMpa8n1mB57jrwskha
+               UJC29sTRxXblpfn6IpKVXCWYOFX2A8JdQoE3tjye/O6HQteKFfFFwnS1iGTYHfwP
+               Sf0wOAQXuoNfpvtnZghDyJ1w7nqEsZ0f0HQB4BzR0+ZL9Tc+U57f35rBUzav2rXA
+               U22MwLEMyQVewP2GKxDH6K89Ib4rWP11zSqypb0ZtDQ3y9howXOkTFFhEbtP1Lpb
+               4RAXPxSt4NS+MsswptQ+0MTIzEo0h2ClLqDoIMLHRrLgHYVdqkumvNou6tWceOVX
+               0wzK2bLU7Mty7nto8LCzsaJQMdx4PlsouaBybxSdYBILs0ugNkxncyIasPc1Hxcq
+               K3/yc99Qw6lTNw4M+VMe6kMnEx8qolTSopWSr8wCgO5r//DSxZ+QUXcCAwEAAaNT
+               MFEwHQYDVR0OBBYEFIFty7cr5i6Cu54uHKixJwpBGJTwMB8GA1UdIwQYMBaAFIFt
+               y7cr5i6Cu54uHKixJwpBGJTwMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQEL
+               BQADggIBAChWmYGJUaVNDphbT0g0Run5c82Zg9CLGGEOF2xlNm6p9YIPQsC9eoo0
+               aWHygRxzdyRNr5fDzO0T8OCjxL7Q3PirKMEYyQTuX9IjA8NBjzSWUNdxYib6xBuc
+               sDMrPoIcoxlgG6f1E+C3XFfxzdWozTZBsZ9VpZru0KWxIaKZv14CUr6Q7uEVMOTk
+               VbEhDzX9dKb+eQpHBTYgYLRN7pp3PyGs4UE0syoU7ATMXlUpQ+T+CFCuZWaPRjSH
+               x5RUCrbMGmQCtkPdQLyvHoVvKIQ0hzuNSdXyHL/bc4lMoc71ZRj0f3QTbi7PRjJU
+               tDKNg4zPQAED77OLmj/bcvJHW8kVt9K7ckAU5nw87btdXnNpb8WsjGpOU+oAen2r
+               V6a2mcSIhVanKITaMMZ+7yg5DnDJyUAIyjlxMkmb/qNoOeelzMLGAlhHbRslTfmJ
+               BLy7u1alrdPYdje6WjZwqUpZPFfdgEqUxPlKwnXtM3rcvoMxlROb3OhRGAkO2VHO
+               4S4JeRKw04TFUnwdtn1bXBkCgCh9iJ2vhpIMFddKCHPcsdoPxvDYy7tE/kjF0a3G
+               dXy+86lic2UplYvZ92OGt5VXANTZ4lVgLqLoeKBXwyMYyk4mgUVTkC/ihJ2wN1Kw
+               NlmxSeeg1OCAthpq4UwQws4EZsnC7gUGUai/vEmTq8qAfB1cMGLX
+               -----END CERTIFICATE-----
+                           
+            """;
 
     private static final String TRUSTED_CA_FIWARE_CLIENT = """
             -----BEGIN CERTIFICATE-----
