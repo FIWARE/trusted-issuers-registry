@@ -1,10 +1,8 @@
 package org.fiware.iam.tir.repository;
 
-import io.micronaut.http.annotation.Part;
 import io.micronaut.scheduling.annotation.Scheduled;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
-import org.fiware.iam.did.model.DIDDocumentVO;
 import org.fiware.iam.satellite.model.TrustedCAVO;
 import org.fiware.iam.tir.auth.CertificateMapper;
 import org.fiware.iam.tir.configuration.Party;
@@ -21,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @Slf4j
 @Singleton
@@ -66,25 +63,31 @@ public class InMemoryPartiesRepo implements PartiesRepo {
 
     @Scheduled(fixedDelay = "15s")
     public void updateParties() {
-        List<Party> updatedParties = new ArrayList<>(satelliteProperties.getParties());
-
-        issuersProvider.getAllTrustedIssuers()
-                .flatMap(til -> Mono.zip(til.stream().map(this::getPartyForIssuer).toList(), parties -> Arrays.stream(parties).toList()))
-                .subscribe(partiesList -> {
-                    for (Object partyObject : partiesList) {
-                        if (partyObject instanceof Party party) {
-                            updatedParties.add(party);
-                        } else {
-                            log.warn("Object {} is not a party.", partyObject);
+        try {
+            List<Party> updatedParties = new ArrayList<>(satelliteProperties.getParties());
+            issuersProvider.getAllTrustedIssuers()
+                    .flatMap(til -> Mono.zip(til.stream().map(this::getPartyForIssuer).toList(), parties -> Arrays.stream(parties).toList()))
+                    .subscribe(partiesList -> {
+                        for (Object partyObject : partiesList) {
+                            if (partyObject instanceof Optional<?> optional && optional.isPresent() && optional.get() instanceof Party party) {
+                                updatedParties.add(party);
+                            } else {
+                                log.warn("Optional Object {} is not a party or was empty.", partyObject);
+                            }
                         }
-                    }
-                    parties.clear();
-                    parties.addAll(updatedParties);
-                });
+                        parties.clear();
+                        parties.addAll(updatedParties);
+                        log.trace("Current parties: {}", updatedParties.stream().map(party -> "%s -> %s".formatted(party.did(), party.crt())));
+                    });
+        } catch (Exception e) {
+            log.error("Exception occurred while updating parties", e);
+            throw e;
+        }
     }
 
 
-    private Mono<Party> getPartyForIssuer(TrustedIssuer trustedIssuer) {
+    private Mono<Optional<Party>> getPartyForIssuer(TrustedIssuer trustedIssuer) {
+
         return didService.retrieveDidDocument(trustedIssuer.getIssuer())
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -92,8 +95,11 @@ public class InMemoryPartiesRepo implements PartiesRepo {
                         .getCertificate(didDoc)
                         .filter(Optional::isPresent)
                         .map(Optional::get)
-                        .map(cert -> new Party(didDoc.getId(), didDoc.getId(), didDoc.getId(), "Active", cert, didDoc))
-                );
+                        .map(cert -> Optional.of(new Party(didDoc.getId(), didDoc.getId(), didDoc.getId(), "Active", cert, didDoc)))
+                ).onErrorResume(err -> {
+                    log.error("Failed to retrieve data for issuer {}", trustedIssuer.getIssuer(), err);
+                    return Mono.just(Optional.empty());
+                });
     }
 
     @Override
