@@ -24,112 +24,112 @@ import java.util.Optional;
 @Singleton
 public class InMemoryPartiesRepo implements PartiesRepo {
 
-	private final SatelliteProperties satelliteProperties;
-	private final IssuersProvider issuersProvider;
-	private final List<Party> parties;
-	private final DidService didService;
-	private final CertificateMapper certificateMapper;
+    private final SatelliteProperties satelliteProperties;
+    private final IssuersProvider issuersProvider;
+    private final List<Party> parties;
+    private final DidService didService;
+    private final CertificateMapper certificateMapper;
 
-	public InMemoryPartiesRepo(SatelliteProperties satelliteProperties, IssuersProvider issuersProvider, DidService didService, CertificateMapper certificateMapper) {
-		this.parties = new ArrayList<>(satelliteProperties.getParties());
-		this.satelliteProperties = satelliteProperties;
-		this.issuersProvider = issuersProvider;
-		this.didService = didService;
-		this.certificateMapper = certificateMapper;
-	}
+    public InMemoryPartiesRepo(SatelliteProperties satelliteProperties, IssuersProvider issuersProvider, DidService didService, CertificateMapper certificateMapper) {
+        this.parties = new ArrayList<>(satelliteProperties.getParties());
+        this.satelliteProperties = satelliteProperties;
+        this.issuersProvider = issuersProvider;
+        this.didService = didService;
+        this.certificateMapper = certificateMapper;
+    }
 
-	private Optional<TrustedCAVO> toTrustedCaVO(X509Certificate caCert) {
+    private Optional<TrustedCAVO> toTrustedCaVO(X509Certificate caCert) {
 
-		try {
-			String subject = caCert.getSubjectX500Principal().toString();
-			String validity = isValid(caCert);
-			String fingerprint = certificateMapper.getThumbprint(caCert);
-			return Optional.of(new TrustedCAVO().status("granted").certificateFingerprint(fingerprint)
-					.validity(validity).subject(subject));
-		} catch (CertificateEncodingException e) {
-			log.warn("Was not able to get the fingerprint.");
-		}
-		return Optional.empty();
-	}
+        try {
+            String subject = caCert.getSubjectX500Principal().toString();
+            String validity = isValid(caCert);
+            String fingerprint = certificateMapper.getThumbprint(caCert);
+            return Optional.of(new TrustedCAVO().status("granted").certificateFingerprint(fingerprint)
+                    .validity(validity).subject(subject));
+        } catch (CertificateEncodingException e) {
+            log.warn("Was not able to get the fingerprint.");
+        }
+        return Optional.empty();
+    }
 
-	private String isValid(X509Certificate cert) {
-		try {
-			cert.checkValidity();
-			return "valid";
-		} catch (CertificateExpiredException | CertificateNotYetValidException e) {
-			return "invalid";
-		}
-	}
+    private String isValid(X509Certificate cert) {
+        try {
+            cert.checkValidity();
+            return "valid";
+        } catch (CertificateExpiredException | CertificateNotYetValidException e) {
+            return "invalid";
+        }
+    }
 
-	@Scheduled(fixedDelay = "15s")
-	public void updateParties() {
-		try {
-			List<Party> updatedParties = new ArrayList<>(satelliteProperties.getParties());
-			issuersProvider.getAllTrustedIssuers()
-					.flatMap(til -> Mono.zip(til.stream().map(this::getPartyForIssuer).toList(), parties -> Arrays.stream(parties).toList()))
-					.subscribe(partiesList -> {
-						for (Object partyObject : partiesList) {
-							if (partyObject instanceof Optional<?> optional && optional.isPresent() && optional.get() instanceof Party party) {
-								updatedParties.add(party);
-							} else {
-								log.warn("Optional Object {} is not a party or was empty.", partyObject);
-							}
-						}
-						parties.clear();
-						parties.addAll(updatedParties);
-						log.trace("Current parties: {}", updatedParties.stream().map(party -> "%s -> %s".formatted(party.did(), party.crt())));
-					});
-		} catch (Exception e) {
-			log.error("Exception occurred while updating parties", e);
-			throw e;
-		}
-	}
+    @Scheduled(fixedDelay = "15s")
+    public void updateParties() {
+        try {
+            List<Party> updatedParties = new ArrayList<>(satelliteProperties.getParties());
+            issuersProvider.getAllTrustedIssuers()
+                    .flatMap(til -> Mono.zip(til.stream().map(this::getPartyForIssuer).toList(), parties -> Arrays.stream(parties).toList()))
+                    .subscribe(partiesList -> {
+                        for (Object partyObject : partiesList) {
+                            if (partyObject instanceof Optional<?> optional && optional.isPresent() && optional.get() instanceof Party party) {
+                                updatedParties.add(party);
+                            } else {
+                                log.warn("Optional Object {} is not a party or was empty.", partyObject);
+                            }
+                        }
+                        parties.clear();
+                        parties.addAll(updatedParties);
+                        log.trace("Current parties: {}", updatedParties.stream().map(party -> "%s -> %s".formatted(party.did(), party.crt())));
+                    });
+        } catch (Exception e) {
+            log.error("Exception occurred while updating parties", e);
+            throw e;
+        }
+    }
 
 
-	private Mono<Optional<Party>> getPartyForIssuer(TrustedIssuer trustedIssuer) {
+    private Mono<Optional<Party>> getPartyForIssuer(TrustedIssuer trustedIssuer) {
 
-		return didService.retrieveDidDocument(trustedIssuer.getIssuer())
-				.filter(Optional::isPresent)
-				.map(Optional::get)
-				.flatMap(didDoc -> didService
-						.getCertificate(didDoc)
-						.filter(Optional::isPresent)
-						.map(Optional::get)
-						.map(cert -> Optional.of(new Party(didDoc.getId(), didDoc.getId(), didDoc.getId(), "Active", cert, didDoc)))
-				).onErrorResume(err -> {
-					log.error("Failed to retrieve data for issuer {}", trustedIssuer.getIssuer(), err);
-					return Mono.just(Optional.empty());
-				});
-	}
+        return didService.retrieveDidDocument(trustedIssuer.getIssuer())
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .flatMap(didDoc -> didService
+                        .getCertificate(didDoc)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .map(cert -> Optional.of(new Party(didDoc.getId(), didDoc.getId(), didDoc.getId(), "Active", cert, didDoc)))
+                ).onErrorResume(err -> {
+                    log.error("Failed to retrieve data for issuer {}", trustedIssuer.getIssuer(), err);
+                    return Mono.just(Optional.empty());
+                });
+    }
 
-	@Override
-	public List<Party> getParties() {
-		return parties;
-	}
+    @Override
+    public List<Party> getParties() {
+        return parties;
+    }
 
-	@Override
-	public List<TrustedCAVO> getTrustedCAs() {
-		List<TrustedCAVO> trustedCAVOS = new ArrayList<>();
+    @Override
+    public List<TrustedCAVO> getTrustedCAs() {
+        List<TrustedCAVO> trustedCAVOS = new ArrayList<>();
 
-		satelliteProperties.getTrustedList().stream()
-				.forEach(trustedCA -> toTrustedCaVO(certificateMapper.getCertificates(trustedCA.crt()).get(0)).ifPresent(
-						trustedCAVOS::add));
+        satelliteProperties.getTrustedList().stream()
+                .forEach(trustedCA -> toTrustedCaVO(certificateMapper.getCertificates(trustedCA.crt()).get(0)).ifPresent(
+                        trustedCAVOS::add));
 
-		return trustedCAVOS;
-	}
+        return trustedCAVOS;
+    }
 
-	@Override
-	public Optional<Party> getPartyById(String id) {
-		return parties.stream().filter(party -> party.id().equals(id)).findFirst();
-	}
+    @Override
+    public Optional<Party> getPartyById(String id) {
+        return parties.stream().filter(party -> party.id().equals(id)).findFirst();
+    }
 
-	@Override
-	public Optional<Party> getPartyByDID(String did) {
-		return parties.stream().filter(party -> party.did().equals(did)).findFirst();
-	}
+    @Override
+    public Optional<Party> getPartyByDID(String did) {
+        return parties.stream().filter(party -> party.did().equals(did)).findFirst();
+    }
 
-	@Override
-	public void addParty(Party party) {
+    @Override
+    public void addParty(Party party) {
 
-	}
+    }
 }
