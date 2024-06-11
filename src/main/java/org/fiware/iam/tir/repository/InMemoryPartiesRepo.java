@@ -77,7 +77,7 @@ public class InMemoryPartiesRepo implements PartiesRepo {
                         }
                         parties.clear();
                         parties.addAll(updatedParties);
-                        log.trace("Current parties: {}", updatedParties.stream().map(party -> "%s -> %s".formatted(party.did(), party.crt())));
+                        log.trace("Current parties: {}", updatedParties.stream().map(party -> "%s -> %s".formatted(party.did(), party.crt())).toList());
                     });
         } catch (Exception e) {
             log.error("Exception occurred while updating parties", e);
